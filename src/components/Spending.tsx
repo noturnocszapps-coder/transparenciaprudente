@@ -1,20 +1,23 @@
 import { useState, useEffect, useMemo } from "react";
-import { Spending as SpendingType } from "../types";
-import { AlertTriangle, Download, Filter, Search, Calendar } from "lucide-react";
+import { Spending as SpendingType, Councilor } from "../types";
+import { AlertTriangle, Download, Filter, Search, User } from "lucide-react";
 import { cn } from "@/src/lib/utils";
 import { db, handleFirestoreError, OperationType } from "@/src/firebase";
 import { collection, onSnapshot, query, orderBy } from "firebase/firestore";
 
 export default function Spending() {
   const [spendings, setSpendings] = useState<SpendingType[]>([]);
+  const [councilors, setCouncilors] = useState<Councilor[]>([]);
   const [filter, setFilter] = useState("all");
   const [categoryFilter, setCategoryFilter] = useState("all");
+  const [councilorFilter, setCouncilorFilter] = useState("all");
   const [search, setSearch] = useState("");
   const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
-    const q = query(collection(db, "spending"), orderBy("date", "desc"));
-    const unsubscribe = onSnapshot(q, (snapshot) => {
+    // Fetch Spendings
+    const qSpending = query(collection(db, "spending"), orderBy("date", "desc"));
+    const unsubSpending = onSnapshot(qSpending, (snapshot) => {
       const data = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() } as SpendingType));
       setSpendings(data);
     }, (err) => {
@@ -22,18 +25,31 @@ export default function Spending() {
       setError("Erro ao carregar gastos.");
     });
 
-    return () => unsubscribe();
+    // Fetch Councilors
+    const qCouncilors = query(collection(db, "councilors"), orderBy("name", "asc"));
+    const unsubCouncilors = onSnapshot(qCouncilors, (snapshot) => {
+      const data = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() } as Councilor));
+      setCouncilors(data);
+    }, (err) => {
+      handleFirestoreError(err, OperationType.GET, "councilors");
+    });
+
+    return () => {
+      unsubSpending();
+      unsubCouncilors();
+    };
   }, []);
 
   const filtered = useMemo(() => {
     return spendings.filter(s => {
       const matchesAnomaly = filter === "all" || (filter === "anomalies" && s.isAnomaly);
       const matchesCategory = categoryFilter === "all" || s.category === categoryFilter;
+      const matchesCouncilor = councilorFilter === "all" || s.councilorId === councilorFilter;
       const matchesSearch = s.description.toLowerCase().includes(search.toLowerCase()) || 
                            s.supplier.toLowerCase().includes(search.toLowerCase());
-      return matchesAnomaly && matchesCategory && matchesSearch;
+      return matchesAnomaly && matchesCategory && matchesCouncilor && matchesSearch;
     });
-  }, [spendings, filter, categoryFilter, search]);
+  }, [spendings, filter, categoryFilter, councilorFilter, search]);
 
   if (error) return <div className="p-8 text-red-600 bg-red-50 rounded-xl border border-red-100">{error}</div>;
   if (spendings.length === 0) return <div className="flex items-center justify-center h-64">Carregando gastos...</div>;
@@ -65,6 +81,20 @@ export default function Spending() {
             <option value="all">Todas Categorias</option>
             {categories.map(cat => (
               <option key={cat} value={cat}>{cat}</option>
+            ))}
+          </select>
+        </div>
+
+        <div className="flex items-center gap-2 px-3 py-2 bg-slate-50 rounded-xl border border-slate-100">
+          <User size={18} className="text-slate-400" />
+          <select 
+            value={councilorFilter}
+            onChange={(e) => setCouncilorFilter(e.target.value)}
+            className="bg-transparent text-sm font-medium outline-none text-slate-700 max-w-[150px]"
+          >
+            <option value="all">Todos Vereadores</option>
+            {councilors.map(c => (
+              <option key={c.id} value={c.id}>{c.name}</option>
             ))}
           </select>
         </div>
@@ -122,7 +152,7 @@ export default function Spending() {
                     {s.isAnomaly ? (
                       <div className="flex items-center gap-2 text-red-600 group relative cursor-help">
                         <AlertTriangle size={18} />
-                        <span className="text-xs font-bold">Suspeito</span>
+                        <span className="text-xs font-bold">Anomalia</span>
                         <div className="absolute bottom-full left-1/2 -translate-x-1/2 mb-2 hidden group-hover:block w-48 p-2 bg-slate-900 text-white text-[10px] rounded-lg shadow-xl z-50">
                           {s.anomalyReason}
                         </div>

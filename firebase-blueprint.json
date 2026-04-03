@@ -28,7 +28,8 @@
         "amount": { "type": "number" },
         "supplier": { "type": "string" },
         "isAnomaly": { "type": "boolean" },
-        "anomalyReason": { "type": "string" }
+        "anomalyReason": { "type": "string" },
+        "councilorId": { "type": "string" }
       },
       "required": ["id", "date", "category", "amount", "supplier"]
     },

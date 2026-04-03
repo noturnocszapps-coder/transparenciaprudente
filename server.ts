@@ -17,15 +17,54 @@ async function startServer() {
 
   // Mock data stored in memory for demo
   let councilors = [
-    { id: "1", name: "João Silva", party: "PL", projectsPresented: 15, projectsApproved: 5, attendanceRate: 95, rankingScore: 85, lastUpdate: new Date().toISOString() },
-    { id: "2", name: "Maria Oliveira", party: "PT", projectsPresented: 12, projectsApproved: 8, attendanceRate: 100, rankingScore: 92, lastUpdate: new Date().toISOString() },
-    { id: "3", name: "Pedro Santos", party: "MDB", projectsPresented: 8, projectsApproved: 2, attendanceRate: 80, rankingScore: 60, lastUpdate: new Date().toISOString() },
+    { 
+      id: "1", 
+      name: "João Silva", 
+      party: "PL", 
+      projectsPresented: 15, 
+      projectsApproved: 5, 
+      attendanceRate: 95, 
+      rankingScore: 85, 
+      lastUpdate: new Date().toISOString(),
+      recentProjects: [
+        { title: "Lei de Incentivo ao Esporte Local", date: "2026-02-10", status: "Aprovado" },
+        { title: "Programa de Arborização Urbana", date: "2026-01-15", status: "Em Tramitação" }
+      ]
+    },
+    { 
+      id: "2", 
+      name: "Maria Oliveira", 
+      party: "PT", 
+      projectsPresented: 12, 
+      projectsApproved: 8, 
+      attendanceRate: 100, 
+      rankingScore: 92, 
+      lastUpdate: new Date().toISOString(),
+      recentProjects: [
+        { title: "Criação do Fundo Municipal de Cultura", date: "2026-03-01", status: "Aprovado" },
+        { title: "Reforma do Posto de Saúde Central", date: "2026-02-20", status: "Aprovado" }
+      ]
+    },
+    { 
+      id: "3", 
+      name: "Pedro Santos", 
+      party: "MDB", 
+      projectsPresented: 8, 
+      projectsApproved: 2, 
+      attendanceRate: 80, 
+      rankingScore: 60, 
+      lastUpdate: new Date().toISOString(),
+      recentProjects: [
+        { title: "Melhoria na Iluminação Pública", date: "2026-01-05", status: "Aprovado" }
+      ]
+    },
   ];
 
   let spendings = [
     { id: "s1", date: "2026-03-25", category: "Saúde", description: "Compra de medicamentos", amount: 150000, supplier: "Pharma S.A.", isAnomaly: false },
     { id: "s2", date: "2026-03-26", category: "Educação", description: "Reforma de escola", amount: 500000, supplier: "ConstruTudo Ltda", isAnomaly: true, anomalyReason: "Gasto 40% acima da média para reformas similares." },
-    { id: "s3", date: "2026-03-27", category: "Gabinete", description: "Material de escritório", amount: 5000, supplier: "Papelaria Central", isAnomaly: false },
+    { id: "s3", date: "2026-03-27", category: "Gabinete", description: "Material de escritório", amount: 5000, supplier: "Papelaria Central", isAnomaly: false, councilorId: "1" },
+    { id: "s4", date: "2026-03-28", category: "Gabinete", description: "Publicidade institucional", amount: 12000, supplier: "Agência Prudente", isAnomaly: false, councilorId: "2" },
   ];
 
   // API Routes

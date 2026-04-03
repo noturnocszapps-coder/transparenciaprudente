@@ -7,6 +7,7 @@ export interface Councilor {
   attendanceRate: number; // 0-100
   rankingScore: number;
   lastUpdate: string;
+  recentProjects?: { title: string; date: string; status: string }[];
 }
 
 export interface Spending {
@@ -18,6 +19,7 @@ export interface Spending {
   supplier: string;
   isAnomaly: boolean;
   anomalyReason?: string;
+  councilorId?: string; // Optional: associated councilor for Gabinete expenses
 }
 
 export interface Report {
