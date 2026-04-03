@@ -1,0 +1,7 @@
+{
+  "name": "Prudente Transparente",
+  "description": "Plataforma automatizada de fiscalização pública para Presidente Prudente, utilizando IA para analisar gastos e desempenho legislativo.",
+  "requestFramePermissions": [
+    "geolocation"
+  ]
+}

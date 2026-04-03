@@ -1,0 +1,87 @@
+rules_version = '2';
+service cloud.firestore {
+  match /databases/{database}/documents {
+    
+    // ===============================================================
+    // Assumed Data Model
+    // ===============================================================
+    //
+    // Collection: users
+    // Fields: uid (string), email (string), role (string: admin|user), createdAt (timestamp)
+    //
+    // Collection: councilors
+    // Fields: id (string), name (string), party (string), projectsPresented (number), 
+    //         projectsApproved (number), attendanceRate (number), rankingScore (number), lastUpdate (timestamp)
+    //
+    // Collection: spending
+    // Fields: id (string), date (timestamp), category (string), description (string), 
+    //         amount (number), supplier (string), isAnomaly (bool), anomalyReason (string)
+    //
+    // Collection: reports
+    // Fields: id (string), date (timestamp), title (string), content (string), type (string), summary (string)
+    //
+    // ===============================================================
+
+    // ===============================================================
+    // Helper Functions
+    // ===============================================================
+    function isAuthenticated() {
+      return request.auth != null;
+    }
+
+    function isOwner(userId) {
+      return isAuthenticated() && request.auth.uid == userId;
+    }
+
+    function isAdmin() {
+      return isAuthenticated() &&
+        (get(/databases/$(database)/documents/users/$(request.auth.uid)).data.role == 'admin' ||
+         (request.auth.token.email == "contato.fh3@gmail.com" && request.auth.token.email_verified == true));
+    }
+
+    function isValidUser(data) {
+      return data.keys().hasOnly(['uid', 'email', 'role', 'createdAt']) &&
+             data.uid is string && data.uid == request.auth.uid &&
+             data.email is string && data.email.size() < 100 &&
+             data.role in ['admin', 'user'] &&
+             data.createdAt is timestamp;
+    }
+
+    function isValidCouncilor(data) {
+      return data.keys().hasAll(['id', 'name', 'party']) &&
+             data.name is string && data.name.size() < 100 &&
+             data.party is string && data.party.size() < 20;
+    }
+
+    function isValidSpending(data) {
+      return data.keys().hasAll(['id', 'date', 'category', 'amount', 'supplier']) &&
+             data.amount is number && data.amount >= 0 &&
+             data.supplier is string && data.supplier.size() < 200;
+    }
+
+    // ===============================================================
+    // Rules
+    // ===============================================================
+
+    match /users/{userId} {
+      allow read: if isOwner(userId) || isAdmin();
+      allow create: if isAuthenticated() && isValidUser(request.resource.data) && (request.resource.data.role == 'user' || isAdmin());
+      allow update: if isAuthenticated() && isValidUser(request.resource.data) && (request.resource.data.role == resource.data.role || isAdmin());
+    }
+
+    match /councilors/{councilorId} {
+      allow read: if true; // Public transparency
+      allow write: if isAdmin();
+    }
+
+    match /spending/{spendingId} {
+      allow read: if true; // Public transparency
+      allow write: if isAdmin();
+    }
+
+    match /reports/{reportId} {
+      allow read: if true; // Public transparency
+      allow write: if isAdmin();
+    }
+  }
+}

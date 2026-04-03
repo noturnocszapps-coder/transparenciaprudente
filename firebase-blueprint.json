@@ -1,0 +1,80 @@
+{
+  "entities": {
+    "councilor": {
+      "title": "Councilor",
+      "description": "A member of the municipal chamber of Presidente Prudente.",
+      "type": "object",
+      "properties": {
+        "id": { "type": "string" },
+        "name": { "type": "string" },
+        "party": { "type": "string" },
+        "projectsPresented": { "type": "number" },
+        "projectsApproved": { "type": "number" },
+        "attendanceRate": { "type": "number" },
+        "rankingScore": { "type": "number" },
+        "lastUpdate": { "type": "string", "format": "date-time" }
+      },
+      "required": ["id", "name", "party"]
+    },
+    "spending": {
+      "title": "Spending",
+      "description": "A public expenditure record.",
+      "type": "object",
+      "properties": {
+        "id": { "type": "string" },
+        "date": { "type": "string", "format": "date" },
+        "category": { "type": "string" },
+        "description": { "type": "string" },
+        "amount": { "type": "number" },
+        "supplier": { "type": "string" },
+        "isAnomaly": { "type": "boolean" },
+        "anomalyReason": { "type": "string" }
+      },
+      "required": ["id", "date", "category", "amount", "supplier"]
+    },
+    "report": {
+      "title": "Report",
+      "description": "An AI-generated fiscal report.",
+      "type": "object",
+      "properties": {
+        "id": { "type": "string" },
+        "date": { "type": "string", "format": "date-time" },
+        "title": { "type": "string" },
+        "content": { "type": "string" },
+        "type": { "type": "string", "enum": ["daily", "weekly"] },
+        "summary": { "type": "string" }
+      },
+      "required": ["id", "date", "title", "content", "type"]
+    },
+    "user": {
+      "title": "User",
+      "description": "A platform user.",
+      "type": "object",
+      "properties": {
+        "uid": { "type": "string" },
+        "email": { "type": "string", "format": "email" },
+        "role": { "type": "string", "enum": ["admin", "user"] },
+        "createdAt": { "type": "string", "format": "date-time" }
+      },
+      "required": ["uid", "email", "role"]
+    }
+  },
+  "firestore": {
+    "/councilors/{councilorId}": {
+      "schema": { "$ref": "councilor" },
+      "description": "Collection of councilors."
+    },
+    "/spending/{spendingId}": {
+      "schema": { "$ref": "spending" },
+      "description": "Collection of public spending records."
+    },
+    "/reports/{reportId}": {
+      "schema": { "$ref": "report" },
+      "description": "Collection of AI reports."
+    },
+    "/users/{userId}": {
+      "schema": { "$ref": "user" },
+      "description": "Collection of user profiles."
+    }
+  }
+}
